@@ -2,6 +2,9 @@ package com.example.StudentManagementSystem.service.impl;
 import com.example.StudentManagementSystem.model.Student;
 import com.example.StudentManagementSystem.repository.StudentRepository;
 import com.example.StudentManagementSystem.service.StudentService;
+
+import lombok.Data;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.util.List;
@@ -11,6 +14,7 @@ import javax.management.RuntimeErrorException;
 
 @Service
 public class StudentServiceImpl implements StudentService{
+
     @Autowired
     private StudentRepository studentRepository;
 
@@ -56,5 +60,32 @@ public class StudentServiceImpl implements StudentService{
     public void deleteStudent(long id) {
         studentRepository.findById(id).orElseThrow(()->new RuntimeException());
         studentRepository.deleteById(id);
+    }
+
+    // Find student by year of enrollment
+    @Override
+    public List<Student> getStudentByYOE(String YOE) {
+        return studentRepository.findByYOE(YOE);
+    }
+
+    // Find department given student ID
+    @Override
+    public String getDeptById(long id) {
+        Student student = studentRepository.findById(id).orElseThrow(()->new RuntimeException());
+        return student.getDept();
+    }
+
+    // Delete student by year of enrollment
+    @Override
+    public void deleteStudentByYOE(String YOE) {
+        try {
+            List<Student> students = studentRepository.findByYOE(YOE);
+            if (students.isEmpty()) {
+                throw new RuntimeException("No students found for the year of enrollment: " + YOE);
+            }
+            studentRepository.deleteByYOE(YOE);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to delete students by year of enrollment: " + YOE, e);
+        }
     }
 }
